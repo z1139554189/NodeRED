@@ -1,0 +1,8 @@
+node_modules/
+*.log
+nodered-*.log
+nodered-err-*.log
+nodered-err.log
+flows_cred.json
+lib/
+.node_history

@@ -1,0 +1,270 @@
+[
+    {
+        "id": "tab-dashboard",
+        "type": "tab",
+        "label": "OPC UA Dashboard",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "tab-proxy",
+        "type": "tab",
+        "label": "API Proxy",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "http-dashboard",
+        "type": "http in",
+        "z": "tab-dashboard",
+        "name": "GET /dashboard",
+        "url": "/dashboard",
+        "method": "get",
+        "x": 110,
+        "y": 80,
+        "wires": [
+            [
+                "file-dashboard"
+            ]
+        ]
+    },
+    {
+        "id": "file-dashboard",
+        "type": "file in",
+        "z": "tab-dashboard",
+        "name": "读取 dashboard.html",
+        "filename": "C:\\Users\\Administrator\\.node-red\\dashboard.html",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "x": 380,
+        "y": 80,
+        "wires": [
+            [
+                "http-dashboard-resp"
+            ]
+        ]
+    },
+    {
+        "id": "http-dashboard-resp",
+        "type": "http response",
+        "z": "tab-dashboard",
+        "name": "返回 HTML",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "text/html; charset=utf-8"
+        },
+        "x": 630,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "http-proxy-health",
+        "type": "http in",
+        "z": "tab-proxy",
+        "name": "GET /api/proxy/health",
+        "url": "/api/proxy/health",
+        "method": "get",
+        "x": 140,
+        "y": 60,
+        "wires": [
+            [
+                "http-proxy-req-health"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-req-health",
+        "type": "http request",
+        "z": "tab-proxy",
+        "name": "调用 Bridge /health",
+        "method": "GET",
+        "ret": "obj",
+        "url": "http://127.0.0.1:8000/health",
+        "x": 490,
+        "y": 60,
+        "wires": [
+            [
+                "http-proxy-resp-health"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-resp-health",
+        "type": "http response",
+        "z": "tab-proxy",
+        "name": "返回健康状态",
+        "statusCode": "",
+        "x": 840,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "http-proxy-cache",
+        "type": "http in",
+        "z": "tab-proxy",
+        "name": "GET /api/proxy/cache-stats",
+        "url": "/api/proxy/cache-stats",
+        "method": "get",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "http-proxy-req-cache"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-req-cache",
+        "type": "http request",
+        "z": "tab-proxy",
+        "name": "调用 Bridge /api/v1/cache/stats",
+        "method": "GET",
+        "ret": "obj",
+        "url": "http://127.0.0.1:8000/api/v1/cache/stats",
+        "x": 450,
+        "y": 100,
+        "wires": [
+            [
+                "http-proxy-resp-cache"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-resp-cache",
+        "type": "http response",
+        "z": "tab-proxy",
+        "name": "返回缓存状态",
+        "statusCode": "",
+        "x": 840,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "http-proxy-batch",
+        "type": "http in",
+        "z": "tab-proxy",
+        "name": "POST /api/proxy/batch-read",
+        "url": "/api/proxy/batch-read",
+        "method": "post",
+        "x": 120,
+        "y": 140,
+        "wires": [
+            [
+                "http-proxy-req-batch"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-req-batch",
+        "type": "http request",
+        "z": "tab-proxy",
+        "name": "调用 Bridge batch-read",
+        "method": "POST",
+        "ret": "obj",
+        "url": "http://127.0.0.1:8000/api/v1/nodes/batch-read",
+        "x": 480,
+        "y": 140,
+        "wires": [
+            [
+                "http-proxy-resp-batch"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-resp-batch",
+        "type": "http response",
+        "z": "tab-proxy",
+        "name": "返回批量数据",
+        "statusCode": "",
+        "x": 840,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "http-proxy-query",
+        "type": "http in",
+        "z": "tab-proxy",
+        "name": "POST /api/proxy/query",
+        "url": "/api/proxy/query",
+        "method": "post",
+        "x": 140,
+        "y": 180,
+        "wires": [
+            [
+                "http-proxy-req-query"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-req-query",
+        "type": "http request",
+        "z": "tab-proxy",
+        "name": "调用 Bridge /history/query",
+        "method": "POST",
+        "ret": "obj",
+        "url": "http://127.0.0.1:8000/api/v1/history/query",
+        "x": 470,
+        "y": 180,
+        "wires": [
+            [
+                "http-proxy-resp-query"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-resp-query",
+        "type": "http response",
+        "z": "tab-proxy",
+        "name": "返回查询结果",
+        "statusCode": "",
+        "x": 840,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "http-proxy-export",
+        "type": "http in",
+        "z": "tab-proxy",
+        "name": "POST /api/proxy/export",
+        "url": "/api/proxy/export",
+        "method": "post",
+        "x": 140,
+        "y": 260,
+        "wires": [
+            [
+                "http-proxy-req-export"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-req-export",
+        "type": "http request",
+        "z": "tab-proxy",
+        "name": "调用 Bridge /history/export",
+        "method": "POST",
+        "ret": "bin",
+        "url": "http://127.0.0.1:8000/api/v1/history/export",
+        "x": 460,
+        "y": 260,
+        "wires": [
+            [
+                "http-proxy-resp-export"
+            ]
+        ]
+    },
+    {
+        "id": "http-proxy-resp-export",
+        "type": "http response",
+        "z": "tab-proxy",
+        "name": "返回 Excel",
+        "statusCode": "",
+        "headers": {
+            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Content-Disposition": "attachment; filename=\"opcua-report.xlsx\""
+        },
+        "x": 830,
+        "y": 260,
+        "wires": []
+    }
+]

@@ -14,6 +14,8 @@
 | 8 | FIQ 单位显示 | Excel/卡片/tooltip 三处统一加 `kg` |
 | 9 | Dashboard 断开修复 | fetch 路径从 Bridge API → Proxy API，flows.json 去掉 function 节点 |
 | 10 | Node-RED v4 兼容 | http request URL 直写节点配置，不通过 msg 传入 |
+| 11 | Dashboard 断开修复（第二次） | dashboard.html 更新后 fetch 路径回退到 Bridge API，全部改回 PROXY 路径 |
+| 12 | GitHub 推送 | 清理无用文件（.config.*、.sessions.json），推送到 z1139554189/Node-RED- |
 
 ## API Proxy 架构
 
@@ -46,6 +48,7 @@
 | 6 | Dashboard JS fetch 路径必须和代理路径一致，否则 404 | 改为 `/api/proxy/...` 路径 |
 | 7 | PowerShell 部署 JSON 含中文必须 `Get-Content -Encoding UTF8` + `charset=utf-8` | 否则中文变 `??` |
 | 8 | 采样取离桶起始最近的值，不是最后一条也不是平均值 | 用户明确的业务需求 |
+| 9 | dashboard.html 更新后 fetch 路径容易回退 | 每次编辑 HTML 必须检查所有 fetch 是否用 PROXY 而非 BASE + '/api/v1/...' |
 
 ## 访问地址
 

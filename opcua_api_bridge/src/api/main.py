@@ -333,7 +333,7 @@ class BatchHistoryRequest(BaseModel):
     node_ids: List[str] = Field(..., description="节点ID列表，如 ['ns=1;s=FIT_05R301F01.PV']")
     start_time: str = Field(..., description="起始时间 ISO格式")
     end_time: str = Field(..., description="结束时间 ISO格式")
-    interval_seconds: int = Field(60, ge=1, le=3600, description="采样间隔（秒），默认60")
+    interval_seconds: int = Field(60, ge=0, le=3600, description="采样间隔（秒），默认60，0=全量原始数据")
 
 class BatchHistoryResponse(BaseModel):
     series: List[Dict[str, Any]]
@@ -430,6 +430,13 @@ async def batch_history_export(req: BatchHistoryRequest):
     col_idx = 2
     for node_id in req.node_ids:
         display = node_id.split("s=")[-1] if "s=" in node_id else node_id
+        # 表头备注单位
+        if "FIQ" in display.upper():
+            display = f"{display} (kg)"
+        elif "FIT" in display.upper() and "ERR" not in display.upper():
+            display = f"{display} (kg/h)"
+        elif "ERR" in display.upper():
+            display = f"{display} (0/1)"
         cell = ws.cell(row=1, column=col_idx, value=display)
         cell.font = header_font
         cell.fill = header_fill
@@ -483,11 +490,7 @@ async def batch_history_export(req: BatchHistoryRequest):
             cell = ws.cell(row=row_idx, column=2 + col_offset, value=val)
             cell.border = thin_border
             if val is not None:
-                # FIQ 累积流量加单位 kg
-                if "FIQ" in node_id.upper():
-                    cell.number_format = '0.00" kg"'
-                else:
-                    cell.number_format = '0.00'
+                cell.number_format = '0.00'
 
     # 调整列宽
     ws.column_dimensions["A"].width = 22

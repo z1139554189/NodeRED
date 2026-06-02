@@ -17,6 +17,7 @@
 | 11 | Dashboard 断开修复（第二次） | dashboard.html 更新后 fetch 路径回退到 Bridge API，全部改回 PROXY 路径 |
 | 12 | GitHub 推送 | 清理无用文件（.config.*、.sessions.json），推送到 z1139554189/Node-RED- |
 | 13 | client.py 跨仓库同步 | OPC-UA-Bridge V7.1.0 → .node-red，_SubHandler 即时更新 _value_cache |
+| 14 | main.py 跨仓库同步 | ge=0、Excel 表头单位、统一数值格式，两边核心逻辑一致 |
 
 ## API Proxy 架构
 

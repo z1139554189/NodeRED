@@ -18,6 +18,7 @@
 | 12 | GitHub 推送 | 清理无用文件（.config.*、.sessions.json），推送到 z1139554189/Node-RED- |
 | 13 | client.py 跨仓库同步 | OPC-UA-Bridge V7.1.0 → .node-red，_SubHandler 即时更新 _value_cache |
 | 14 | main.py 跨仓库同步 | ge=0、Excel 表头单位、统一数值格式，两边核心逻辑一致 |
+| 15 | Dashboard 断开修复（第三次） | dashboard.html fetch 路径第三次回退，添加 PROXY 常量并全部修正 |
 
 ## API Proxy 架构
 
@@ -51,6 +52,7 @@
 | 7 | PowerShell 部署 JSON 含中文必须 `Get-Content -Encoding UTF8` + `charset=utf-8` | 否则中文变 `??` |
 | 8 | 采样取离桶起始最近的值，不是最后一条也不是平均值 | 用户明确的业务需求 |
 | 9 | dashboard.html 更新后 fetch 路径容易回退 | 每次编辑 HTML 必须检查所有 fetch 是否用 PROXY 而非 BASE + '/api/v1/...' |
+| 10 | dashboard.html 易被外部工具/手动覆盖 | 考虑设为只读或在部署脚本中加入路径校验 |
 
 ## 访问地址
 

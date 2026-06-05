@@ -284,15 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==================== 登录鉴权结束 ====================
 
 const BASE = window.location.origin;
-const PORT = window.location.port;
-const IS_NR = PORT === '1880';       // 是否运行在 Node-RED (1880) 下
-const API = {
-  health:     IS_NR ? '/api/proxy/health'          : '/health',
-  cacheStats: IS_NR ? '/api/proxy/cache-stats'    : '/api/v1/cache/stats',
-  batchRead:  IS_NR ? '/api/proxy/batch-read'     : '/api/v1/nodes/batch-read',
-  query:      IS_NR ? '/api/proxy/query'          : '/api/v1/history/query',
-  export:     IS_NR ? '/api/proxy/export'          : '/api/v1/history/export',
-};
+const PROXY = BASE + '/api/proxy';
 
 // 所有已知节点
 const ALL_NODES_FIT = ['FIT_05R301F01.PV','FIT_05R302F01.PV','FIT_05R303F01.PV','FIT_05R304F01.PV','FIT_05R305F01.PV','FIT_05R306F01.PV','FIT_05R307F01.PV','FIT_05R308F01.PV','FIT_05R309F01.PV','FIT_05R310F01.PV'];
@@ -1034,5 +1026,6 @@ startPollLoop();
 </script>
 </body>
 </html>
+
 
 

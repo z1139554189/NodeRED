@@ -454,8 +454,8 @@ function getSelectedNodes() {
 async function pollRealtime() {
   try {
     const [healthResp, cacheResp] = await Promise.all([
-      fetch(API.health),
-      fetch(API.cacheStats)
+      fetch(PROXY + '/health'),
+      fetch(PROXY + '/cache-stats')
     ]);
     const health = await healthResp.json();
     const cache = await cacheResp.json();
@@ -471,7 +471,7 @@ async function pollRealtime() {
 
     // 批量查询包含 ERR 节点（用于 FIT 卡片状态）
     const batchBody = JSON.stringify(ALL_BATCH_NODES.map(n => 'ns=1;s=' + n));
-    const valsResp = await fetch(API.batchRead, {
+    const valsResp = await fetch(PROXY + '/batch-read', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: batchBody
     });
     const valsData = await valsResp.json();
@@ -574,7 +574,7 @@ async function queryHistory() {
   };
 
   try {
-    const resp = await fetch(API.query, {
+    const resp = await fetch(PROXY + '/query', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const data = await resp.json();
@@ -673,7 +673,7 @@ async function exportExcel() {
   };
 
   try {
-    const resp = await fetch(API.export, {
+    const resp = await fetch(PROXY + '/export', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const blob = await resp.blob();
@@ -851,7 +851,7 @@ async function queryPopupHistory() {
   };
   
   try {
-    const resp = await fetch(API.query, {
+    const resp = await fetch(PROXY + '/query', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const data = await resp.json();
@@ -1034,4 +1034,5 @@ startPollLoop();
 </script>
 </body>
 </html>
+
 

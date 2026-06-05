@@ -18,7 +18,7 @@
 | 12 | GitHub 推送 | 清理无用文件（.config.*、.sessions.json），推送到 z1139554189/Node-RED- |
 | 13 | client.py 跨仓库同步 | OPC-UA-Bridge V7.1.0 → .node-red，_SubHandler 即时更新 _value_cache |
 | 14 | main.py 跨仓库同步 | ge=0、Excel 表头单位、统一数值格式，两边核心逻辑一致 |
-| 15 | dashboard.html 自适应路径 | 同一文件兼容 1880/8000 双环境，彻底解决频繁回退问题 |
+| 15 | dashboard.html PROXY 路径 | 坚持使用 `PROXY + '/...'` 方案，不擅自改动正常工作代码 |
 
 ## API Proxy 架构
 
@@ -53,6 +53,7 @@
 | 8 | 采样取离桶起始最近的值，不是最后一条也不是平均值 | 用户明确的业务需求 |
 | 9 | dashboard.html 更新后 fetch 路径容易回退 | 每次编辑 HTML 必须检查所有 fetch 是否用 PROXY 而非 BASE + '/api/v1/...' |
 | 10 | dashboard.html 易被外部工具/手动覆盖 | 考虑设为只读或在部署脚本中加入路径校验 |
+| 11 | ⚠️ 严禁擅自改动正常工作代码 | 能用的代码绝对不要动。即使有"更好"的方案，也必须先征得用户同意再实施。自适应 API 路径方案（`const PORT`）导致两个 dashboard 登录无响应，是一个严重失误 |
 
 ## 访问地址
 

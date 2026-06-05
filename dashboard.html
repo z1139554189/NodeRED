@@ -283,8 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // ==================== 登录鉴权结束 ====================
 
-const BASE = window.location.origin;
-const PROXY = BASE + '/api/proxy';
+const PORT = window.location.port;
+const IS_NR = PORT === '1880';       // 是否运行在 Node-RED (1880) 下
+const API = {
+  health:     IS_NR ? '/api/proxy/health'          : '/health',
+  cacheStats: IS_NR ? '/api/proxy/cache-stats'    : '/api/v1/cache/stats',
+  batchRead:  IS_NR ? '/api/proxy/batch-read'     : '/api/v1/nodes/batch-read',
+  query:      IS_NR ? '/api/proxy/query'          : '/api/v1/history/query',
+  export:     IS_NR ? '/api/proxy/export'          : '/api/v1/history/export',
+};
 
 // 所有已知节点
 const ALL_NODES_FIT = ['FIT_05R301F01.PV','FIT_05R302F01.PV','FIT_05R303F01.PV','FIT_05R304F01.PV','FIT_05R305F01.PV','FIT_05R306F01.PV','FIT_05R307F01.PV','FIT_05R308F01.PV','FIT_05R309F01.PV','FIT_05R310F01.PV'];
@@ -446,8 +453,8 @@ function getSelectedNodes() {
 async function pollRealtime() {
   try {
     const [healthResp, cacheResp] = await Promise.all([
-      fetch(PROXY + '/health'),
-      fetch(PROXY + '/cache-stats')
+      fetch(API.health'),
+      fetch(API.cacheStats')
     ]);
     const health = await healthResp.json();
     const cache = await cacheResp.json();
@@ -463,7 +470,7 @@ async function pollRealtime() {
 
     // 批量查询包含 ERR 节点（用于 FIT 卡片状态）
     const batchBody = JSON.stringify(ALL_BATCH_NODES.map(n => 'ns=1;s=' + n));
-    const valsResp = await fetch(PROXY + '/batch-read', {
+    const valsResp = await fetch(API.batchRead, {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: batchBody
     });
     const valsData = await valsResp.json();
@@ -566,7 +573,7 @@ async function queryHistory() {
   };
 
   try {
-    const resp = await fetch(PROXY + '/query', {
+    const resp = await fetch(API.query', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const data = await resp.json();
@@ -665,7 +672,7 @@ async function exportExcel() {
   };
 
   try {
-    const resp = await fetch(PROXY + '/export', {
+    const resp = await fetch(API.export, {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const blob = await resp.blob();
@@ -843,7 +850,7 @@ async function queryPopupHistory() {
   };
   
   try {
-    const resp = await fetch(PROXY + '/query', {
+    const resp = await fetch(API.query', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const data = await resp.json();

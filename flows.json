@@ -59,14 +59,168 @@
         "wires": []
     },
     {
+        "id": "bfaffd9d6fbe4820",
+        "type": "inject",
+        "z": "tab-proxy",
+        "name": "每7小时刷新Token",
+        "props": [
+            {
+                "p": "payload",
+                "v": "",
+                "vt": "str"
+            },
+            {
+                "p": "topic",
+                "v": "",
+                "vt": "str"
+            }
+        ],
+        "repeat": "25200",
+        "once": true,
+        "onceDelay": "3",
+        "x": 130,
+        "y": 80,
+        "wires": [
+            [
+                "cdd9957707424b48"
+            ]
+        ]
+    },
+    {
+        "id": "cdd9957707424b48",
+        "type": "function",
+        "z": "tab-proxy",
+        "name": "构建登录请求",
+        "func": "msg.payload = \"username=admin&password=Admin_00\";\nmsg.headers = {};\nmsg.headers[\"Content-Type\"] = \"application/x-www-form-urlencoded\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 80,
+        "wires": [
+            [
+                "5aa4d26838cf45a8"
+            ]
+        ]
+    },
+    {
+        "id": "5aa4d26838cf45a8",
+        "type": "http request",
+        "z": "tab-proxy",
+        "name": "POST /auth/login",
+        "method": "POST",
+        "ret": "txt",
+        "url": "http://127.0.0.1:8000/api/v1/auth/login",
+        "x": 650,
+        "y": 80,
+        "wires": [
+            [
+                "9e153f89547c42cc"
+            ]
+        ]
+    },
+    {
+        "id": "9e153f89547c42cc",
+        "type": "function",
+        "z": "tab-proxy",
+        "name": "存储Token",
+        "func": "try {\n    const resp = JSON.parse(msg.payload);\n    if (resp && resp.access_token) {\n        flow.set(\"jwt_token\", resp.access_token);\n        node.warn(\"JWT Token OK, 有效\" + resp.expires_minutes + \"分钟\");\n    } else {\n        node.error(\"登录失败: \" + msg.payload);\n    }\n} catch(e) {\n    node.error(\"登录出错: \" + e.message);\n}\n",
+        "outputs": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "d8eb105af355453d",
+        "type": "function",
+        "z": "tab-proxy",
+        "name": "注入 JWT Token",
+        "func": "const token = flow.get(\"jwt_token\");\nif (token) {\n    msg.headers = msg.headers || {};\n    msg.headers[\"Authorization\"] = \"Bearer \" + token;\n}\n// API breaking change: new Bridge expects plain array, dashboard sends {node_ids: [...]}\nif (msg.payload && typeof msg.payload === \"object\" && msg.payload.node_ids) {\n    msg.payload = msg.payload.node_ids;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 220,
+        "wires": [
+            [
+                "http-proxy-req-batch"
+            ]
+        ]
+    },
+    {
+        "id": "2c9c2eac13f54051",
+        "type": "function",
+        "z": "tab-proxy",
+        "name": "注入 JWT Token",
+        "func": "const token = flow.get(\"jwt_token\");\nif (token) {\n    msg.headers = msg.headers || {};\n    msg.headers[\"Authorization\"] = \"Bearer \" + token;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 180,
+        "wires": [
+            [
+                "http-proxy-req-cache"
+            ]
+        ]
+    },
+    {
+        "id": "3de87a37f09d4493",
+        "type": "function",
+        "z": "tab-proxy",
+        "name": "注入 JWT Token",
+        "func": "const token = flow.get(\"jwt_token\");\nif (token) {\n    msg.headers = msg.headers || {};\n    msg.headers[\"Authorization\"] = \"Bearer \" + token;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 260,
+        "wires": [
+            [
+                "http-proxy-req-query"
+            ]
+        ]
+    },
+    {
+        "id": "07aa23b1fe58434d",
+        "type": "function",
+        "z": "tab-proxy",
+        "name": "注入 JWT Token",
+        "func": "const token = flow.get(\"jwt_token\");\nif (token) {\n    msg.headers = msg.headers || {};\n    msg.headers[\"Authorization\"] = \"Bearer \" + token;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 300,
+        "wires": [
+            [
+                "http-proxy-req-export"
+            ]
+        ]
+    },
+    {
         "id": "http-proxy-health",
         "type": "http in",
         "z": "tab-proxy",
         "name": "GET /api/proxy/health",
         "url": "/api/proxy/health",
         "method": "get",
-        "x": 140,
-        "y": 60,
+        "x": 260,
+        "y": 140,
         "wires": [
             [
                 "http-proxy-req-health"
@@ -81,8 +235,8 @@
         "method": "GET",
         "ret": "obj",
         "url": "http://127.0.0.1:8000/health",
-        "x": 490,
-        "y": 60,
+        "x": 870,
+        "y": 140,
         "wires": [
             [
                 "http-proxy-resp-health"
@@ -95,8 +249,8 @@
         "z": "tab-proxy",
         "name": "返回健康状态",
         "statusCode": "",
-        "x": 840,
-        "y": 60,
+        "x": 1220,
+        "y": 140,
         "wires": []
     },
     {
@@ -106,11 +260,11 @@
         "name": "GET /api/proxy/cache-stats",
         "url": "/api/proxy/cache-stats",
         "method": "get",
-        "x": 130,
-        "y": 100,
+        "x": 250,
+        "y": 180,
         "wires": [
             [
-                "http-proxy-req-cache"
+                "2c9c2eac13f54051"
             ]
         ]
     },
@@ -122,8 +276,8 @@
         "method": "GET",
         "ret": "obj",
         "url": "http://127.0.0.1:8000/api/v1/cache/stats",
-        "x": 450,
-        "y": 100,
+        "x": 830,
+        "y": 180,
         "wires": [
             [
                 "http-proxy-resp-cache"
@@ -136,8 +290,8 @@
         "z": "tab-proxy",
         "name": "返回缓存状态",
         "statusCode": "",
-        "x": 840,
-        "y": 100,
+        "x": 1220,
+        "y": 180,
         "wires": []
     },
     {
@@ -147,11 +301,11 @@
         "name": "POST /api/proxy/batch-read",
         "url": "/api/proxy/batch-read",
         "method": "post",
-        "x": 120,
-        "y": 140,
+        "x": 240,
+        "y": 220,
         "wires": [
             [
-                "http-proxy-req-batch"
+                "d8eb105af355453d"
             ]
         ]
     },
@@ -163,8 +317,8 @@
         "method": "POST",
         "ret": "obj",
         "url": "http://127.0.0.1:8000/api/v1/nodes/batch-read",
-        "x": 480,
-        "y": 140,
+        "x": 860,
+        "y": 220,
         "wires": [
             [
                 "http-proxy-resp-batch"
@@ -177,8 +331,8 @@
         "z": "tab-proxy",
         "name": "返回批量数据",
         "statusCode": "",
-        "x": 840,
-        "y": 140,
+        "x": 1220,
+        "y": 220,
         "wires": []
     },
     {
@@ -188,11 +342,11 @@
         "name": "POST /api/proxy/query",
         "url": "/api/proxy/query",
         "method": "post",
-        "x": 140,
-        "y": 180,
+        "x": 260,
+        "y": 260,
         "wires": [
             [
-                "http-proxy-req-query"
+                "3de87a37f09d4493"
             ]
         ]
     },
@@ -204,8 +358,8 @@
         "method": "POST",
         "ret": "obj",
         "url": "http://127.0.0.1:8000/api/v1/history/query",
-        "x": 470,
-        "y": 180,
+        "x": 850,
+        "y": 260,
         "wires": [
             [
                 "http-proxy-resp-query"
@@ -218,8 +372,8 @@
         "z": "tab-proxy",
         "name": "返回查询结果",
         "statusCode": "",
-        "x": 840,
-        "y": 180,
+        "x": 1220,
+        "y": 260,
         "wires": []
     },
     {
@@ -229,11 +383,11 @@
         "name": "POST /api/proxy/export",
         "url": "/api/proxy/export",
         "method": "post",
-        "x": 140,
-        "y": 260,
+        "x": 260,
+        "y": 300,
         "wires": [
             [
-                "http-proxy-req-export"
+                "07aa23b1fe58434d"
             ]
         ]
     },
@@ -245,8 +399,8 @@
         "method": "POST",
         "ret": "bin",
         "url": "http://127.0.0.1:8000/api/v1/history/export",
-        "x": 460,
-        "y": 260,
+        "x": 840,
+        "y": 300,
         "wires": [
             [
                 "http-proxy-resp-export"
@@ -263,8 +417,8 @@
             "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "Content-Disposition": "attachment; filename=\"opcua-report.xlsx\""
         },
-        "x": 830,
-        "y": 260,
+        "x": 1210,
+        "y": 300,
         "wires": []
     }
 ]

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YMT 数字化看板 (V1.4)</title>
+<title>OPC UA Dashboard (V1.3)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <style>
 :root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #c9d1d9; --text2: #8b949e; --accent: #58a6ff; --green: #3fb950; --red: #f85149; --orange: #d29922; }
@@ -32,7 +32,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .control-group input:focus, .control-group select:focus { border-color: var(--accent); }
 /* 节点下拉选择器（WPS 筛选风格） */
 .node-dropdown { position: relative; }
-.node-dropdown-btn { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; min-width: 180px; -webkit-user-select: none; user-select: none; }
+.node-dropdown-btn { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; min-width: 180px; user-select: none; }
 .node-dropdown-btn:hover { border-color: var(--accent); }
 .node-dropdown-btn .badge { background: var(--accent); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .node-dropdown-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 100; background: var(--card); border: 1px solid var(--border); border-radius: 8px; min-width: 520px; max-height: 420px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
@@ -100,20 +100,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .login-box button { width: 100%; padding: 10px; border: none; border-radius: 6px; background: #238636; color: #fff; font-size: 14px; cursor: pointer; font-weight: 600; }
 .login-box button:hover { background: #2ea043; }
 .login-box .err-msg { color: var(--red); font-size: 12px; margin-top: 12px; min-height: 18px; }
-  </style>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%232563eb'/><text x='16' y='23' text-anchor='middle' font-family='Arial,sans-serif' font-size='13' font-weight='bold' fill='white'>YMT</text></svg>" type="image/svg+xml">
+</style>
 </head>
 <body>
 
 <!-- 登录遮罩 -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
-    <h2>YMT 数字化看板</h2>
-    <div class="sub">V1.4 — 请输入授权账号登录</div>
+    <h2>OPC UA Dashboard</h2>
+    <div class="sub">V1.3 — 请输入授权账号登录</div>
     <label for="loginUser">账号</label>
-    <input type="text" id="loginUser" placeholder="请输入账号" autocomplete="off" title="账号" aria-label="账号">
+    <input type="text" id="loginUser" placeholder="请输入账号" autocomplete="off">
     <label for="loginPass">密码</label>
-    <input type="password" id="loginPass" placeholder="请输入密码" autocomplete="new-password" title="密码" aria-label="密码">
+    <input type="password" id="loginPass" placeholder="请输入密码">
     <button onclick="doLogin()">登 录</button>
     <div class="err-msg" id="loginErr"></div>
     <div style="text-align:center;font-size:11px;color:var(--text2);margin-top:16px;opacity:0.7">Powered by ZhangJiaqi</div>
@@ -121,7 +120,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
 <div class="header">
-  <h1>YMT 数字化看板 <span style="font-size:12px;color:var(--green);font-weight:normal;background:#1a2a1a;border-radius:4px;padding:2px 8px;margin-left:8px">V1.4</span><span style="font-size:11px;color:var(--text2);margin-left:8px;opacity:0.7">Powered by ZhangJiaqi</span></h1>
+  <h1>OPC UA Bridge Dashboard <span style="font-size:12px;color:var(--green);font-weight:normal;background:#1a2a1a;border-radius:4px;padding:2px 8px;margin-left:8px">V1.3</span><span style="font-size:11px;color:var(--text2);margin-left:8px;opacity:0.7">Powered by ZhangJiaqi</span></h1>
   <span class="status" id="connStatus">连接中...</span>
 </div>
 
@@ -130,16 +129,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="panel">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;">
       <h2 style="margin-bottom:0">📊 实时数据</h2>
-      <div class="node-dropdown" id="cardDropdown" style="min-width:280px;" title="选择实时卡片显示的节点">
-        <div class="node-dropdown-btn" onclick="toggleCardDropdown()" style="min-width:220px;" aria-label="实时卡片选择器">
+      <div class="node-dropdown" id="cardDropdown" style="min-width:280px;">
+        <div class="node-dropdown-btn" onclick="toggleCardDropdown()" style="min-width:220px;">
           <span id="cardDropdownLabel">全部位号</span>
           <span class="badge" id="cardSelectedBadge" style="display:none">0</span>
           <span style="margin-left:auto;font-size:10px;color:var(--text2)">▼</span>
         </div>
         <div class="node-dropdown-panel" id="cardCheckboxes" style="min-width:400px;">
           <div class="dd-search">
-            <label for="cardSearch" style="display:none">搜索实时卡片</label>
-            <input type="text" id="cardSearch" placeholder="🔍 搜索位号..." oninput="cardFilterNodes(this.value)" aria-label="搜索实时卡片节点">
+            <input type="text" id="cardSearch" placeholder="🔍 搜索位号..." oninput="cardFilterNodes(this.value)">
           </div>
           <div class="dd-actions">
             <button class="dd-action-btn" onclick="cardSelectAll(true)">全选</button>
@@ -164,16 +162,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <h2>📈 历史数据查询</h2>
     <div class="controls">
       <div class="control-group">
-        <label for="startTime">开始时间</label>
+        <label>开始时间</label>
         <input type="datetime-local" id="startTime">
       </div>
       <div class="control-group">
-        <label for="endTime">结束时间</label>
+        <label>结束时间</label>
         <input type="datetime-local" id="endTime">
       </div>
       <div class="control-group">
-        <label for="interval">采样间隔</label>
-        <select id="interval" title="选择数据采样间隔">
+        <label>采样间隔</label>
+        <select id="interval">
           <option value="1">1秒</option>
           <option value="5">5秒</option>
           <option value="10">10秒</option>
@@ -186,17 +184,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         </select>
       </div>
       <div class="control-group">
-        <span style="font-size:11px;color:var(--text2)">选择位号</span>
-        <div class="node-dropdown" id="nodeDropdown" title="选择历史查询节点">
-          <div class="node-dropdown-btn" onclick="toggleDropdown()" aria-label="历史节点选择器">
+        <label>选择位号</label>
+        <div class="node-dropdown" id="nodeDropdown">
+          <div class="node-dropdown-btn" onclick="toggleDropdown()">
             <span id="dropdownLabel">未选择位号</span>
             <span class="badge" id="selectedBadge" style="display:none">0</span>
             <span style="margin-left:auto;font-size:10px;color:var(--text2)">▼</span>
           </div>
           <div class="node-dropdown-panel" id="nodeCheckboxes">
             <div class="dd-search">
-              <label for="ddSearch" style="display:none">搜索历史查询</label>
-              <input type="text" id="ddSearch" placeholder="🔍 搜索位号..." oninput="filterNodes(this.value)" aria-label="搜索历史查询节点">
+              <input type="text" id="ddSearch" placeholder="🔍 搜索位号..." oninput="filterNodes(this.value)">
             </div>
             <div class="dd-actions">
               <button class="dd-action-btn" onclick="selectAll(true)">全选</button>
@@ -245,11 +242,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div class="modal-chart-label">📈 历史趋势（全量原始数据，无采样时间间隔）</div>
         <div class="modal-time-row">
           <div class="control-group">
-            <label for="popupStartTime">开始时间</label>
+            <label>开始时间</label>
             <input type="datetime-local" id="popupStartTime">
           </div>
           <div class="control-group">
-            <label for="popupEndTime">结束时间</label>
+            <label>结束时间</label>
             <input type="datetime-local" id="popupEndTime">
           </div>
           <button class="btn" id="popupBtnQuery" onclick="queryPopupHistory()">🔍 查询</button>
@@ -263,84 +260,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
 <script>
-// ==================== JWT 鉴权 ====================
-const TOKEN_KEY = 'jwt_token';
+// ==================== 登录鉴权 ====================
+const AUTH_USER = 'admin';
+const AUTH_PASS = 'Admin_00';
 
-function getToken() { return localStorage.getItem(TOKEN_KEY); }
-function clearToken() { localStorage.removeItem(TOKEN_KEY); }
-function isLoggedIn() { return !!getToken(); }
-
-// 带 JWT 的 fetch 封装
-async function authFetch(url, options = {}) {
-  const token = getToken();
-  const headers = options.headers || {};
-  if (token) headers['Authorization'] = 'Bearer ' + token;
-  headers['Content-Type'] = headers['Content-Type'] || 'application/json';
-  const resp = await fetch(url, { ...options, headers });
-  if (resp.status === 401) {
-    clearToken();
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-    document.getElementById('loginOverlay').classList.remove('hidden');
-    throw new Error('登录已过期，请重新登录');
-  }
-  return resp;
-}
-
-// API 地址（通过 Node-RED 代理转发到 Bridge）
-const API = {
-  health:     '/api/proxy/health',
-  cacheStats: '/api/proxy/cache-stats',
-  batchRead:  '/api/proxy/batch-read',
-  query:      '/api/proxy/query',
-  export:     '/api/proxy/export',
-  login:      '/api/proxy/login',
-};
-
-async function doLogin() {
+function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
   const err = document.getElementById('loginErr');
-  try {
-    const params = new URLSearchParams();
-    params.append('username', u);
-    params.append('password', p);
-    const resp = await fetch(API.login, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString()
-    });
-    const data = await resp.json();
-    if (resp.ok && data.access_token) {
-      localStorage.setItem(TOKEN_KEY, data.access_token);
-      err.textContent = '';
-      document.getElementById('loginOverlay').classList.add('hidden');
-      startPollLoop();
-    } else {
-      const msg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
-      err.textContent = msg || '账号或密码错误';
-    }
-  } catch(e) {
-    err.textContent = '登录请求失败：' + (e.message || '请重试');
+  if (u === AUTH_USER && p === AUTH_PASS) {
+    document.getElementById('loginOverlay').classList.add('hidden');
+    err.textContent = '';
+  } else {
+    err.textContent = '账号或密码错误，请重试';
   }
-}
-
-function startPollLoop() {
-  if (pollTimer) clearInterval(pollTimer);
-  pollRealtime();
-  pollTimer = setInterval(pollRealtime, 2000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!isLoggedIn()) {
-    document.getElementById('loginOverlay').classList.remove('hidden');
-  } else {
-    document.getElementById('loginOverlay').classList.add('hidden');
-    startPollLoop();
-  }
   const passEl = document.getElementById('loginPass');
-  if (passEl) passEl.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  if (passEl) {
+    passEl.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  }
 });
 // ==================== 登录鉴权结束 ====================
+
+const BASE = window.location.origin;
+const PROXY = BASE + '/api/proxy';
 
 // 所有已知节点
 const ALL_NODES_FIT = ['FIT_05R301F01.PV','FIT_05R302F01.PV','FIT_05R303F01.PV','FIT_05R304F01.PV','FIT_05R305F01.PV','FIT_05R306F01.PV','FIT_05R307F01.PV','FIT_05R308F01.PV','FIT_05R309F01.PV','FIT_05R310F01.PV'];
@@ -502,8 +447,8 @@ function getSelectedNodes() {
 async function pollRealtime() {
   try {
     const [healthResp, cacheResp] = await Promise.all([
-      authFetch(API.health),
-      authFetch(API.cacheStats)
+      fetch(PROXY + '/health'),
+      fetch(PROXY + '/cache-stats')
     ]);
     const health = await healthResp.json();
     const cache = await cacheResp.json();
@@ -519,7 +464,7 @@ async function pollRealtime() {
 
     // 批量查询包含 ERR 节点（用于 FIT 卡片状态）
     const batchBody = JSON.stringify(ALL_BATCH_NODES.map(n => 'ns=1;s=' + n));
-    const valsResp = await authFetch(API.batchRead, {
+    const valsResp = await fetch(PROXY + '/batch-read', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: batchBody
     });
     const valsData = await valsResp.json();
@@ -622,7 +567,7 @@ async function queryHistory() {
   };
 
   try {
-    const resp = await authFetch(API.query, {
+    const resp = await fetch(PROXY + '/query', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const data = await resp.json();
@@ -721,7 +666,7 @@ async function exportExcel() {
   };
 
   try {
-    const resp = await authFetch(API.export, {
+    const resp = await fetch(PROXY + '/export', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const blob = await resp.blob();
@@ -899,7 +844,7 @@ async function queryPopupHistory() {
   };
   
   try {
-    const resp = await authFetch(API.query, {
+    const resp = await fetch(PROXY + '/query', {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
     });
     const data = await resp.json();
@@ -1078,7 +1023,10 @@ async function startPollLoop() {
   try { await pollRealtime(); } catch (_) {}
   _pollTimer = setTimeout(startPollLoop, 500);
 }
-if (isLoggedIn()) startPollLoop();
+startPollLoop();
 </script>
 </body>
 </html>
+
+
+

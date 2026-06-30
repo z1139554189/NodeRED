@@ -397,7 +397,7 @@ async def dashboard():
     from fastapi.responses import FileResponse
     import os
     dashboard_path = os.path.join(os.path.dirname(__file__), "..", "..", "dashboard.html")
-    return FileResponse(dashboard_path, media_type="text/html; charset=utf-8")
+    return FileResponse(dashboard_path, media_type="text/html; charset=utf-8", headers={"Cache-Control": "no-store"})
 
 # Dashboard 测试版
 @app.get("/dashboard_test", tags=["可视化"])
